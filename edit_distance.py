@@ -2,7 +2,7 @@ from math import inf
 
 
 def edit_distance(x: str, y: str, cost: dict = None) -> int:
-    if cost is None or cost.keys():
+    if cost is None:
         cost = {'copy': 0, 'replace': 1, 'twiddle': 1, 'insert': 1, 'delete': 1}
     m = len(x) + 1
     n = len(y) + 1
@@ -49,30 +49,38 @@ def print_matrix(matrix, m, n):
         print(matrix[i * n: (i + 1) * n])
 
 
-def get_ngrams(x, length: int = 2) -> set:
+def get_ngrams(x, length: int = 3) -> set:
     l = len(x)
     if l <= length:
-        return [x]
-
-    ngrams = []
+        return set(x)
+    ngrams = set()
     for i in range(l - length + 1):
-        ngrams.append(x[i: i + length])
-    return set(ngrams)
+        ngrams = ngrams.union({x[i: i + length]})
+    return ngrams
 
 
-def get_closest_word(query: str, lexicon_path: str = "./lexicon.txt") -> list:
+def jaccard_index(x: set, y: set) -> float:
+    return len(x.intersection(y)) / len(x.union(y))
+
+
+def get_closest_word(query: str, index_required: float = 0.66, n_gram_size: int = 3, lexicon_path: str = "./lexicon.txt") -> list and int:
     min_distance = inf
-    closest = list
+    closest = list()
     lexicon = open(lexicon_path, 'r')
-    n1 = get_ngrams(query)
+    check = 0
+    n1 = get_ngrams(query, n_gram_size)
     for word in lexicon:
         word = word.replace("\n", "")
-        n2 = get_ngrams(word)
-        if len(n1.intersection(n2)) / len(n1.union(n2)) >= 0.6:
+        n2 = get_ngrams(word, n_gram_size)
+        if jaccard_index(n1, n2) >= index_required:
+            check += 1
             distance = edit_distance(query, word)
             if distance < min_distance:
                 closest = [word]
                 min_distance = distance
+                if distance == 0:
+                    break
             elif min_distance == distance:
                 closest.append(word)
-    return closest
+    return closest, check
+
