@@ -42,6 +42,7 @@ def sub_test(word_length: int, set_size: int):
     no_ngram_test = list()
     ngram_test = list()
     for i in range(set_size):
+
         # no ngram test
         test = "".join(random.choices(string.ascii_lowercase, k=word_length))
         start = tm()
@@ -50,7 +51,6 @@ def sub_test(word_length: int, set_size: int):
         no_ngram_test.append([test, matches, distance, stop - start])
 
         # ngram test
-
         start = tm()
         matches, distance = get_closest_word(test)
         stop = tm()
