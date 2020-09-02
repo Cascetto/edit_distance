@@ -38,7 +38,7 @@ def automated_test_3(query: str):
     return timechart
 
 
-def sub_test(word_length: int, set_size: int):
+def sub_test(word_length: int, set_size: int) -> List[dict]:
     no_ngram_test = list()
     ngram_test = list()
     for i in range(set_size):
@@ -56,6 +56,8 @@ def sub_test(word_length: int, set_size: int):
         stop = tm()
         ngram_test.append({"word": test, "matches": matches, "distance": distance, "time": stop - start})
 
+    return ngram_test
+
 
 def main_test():
     test_chart = list()
@@ -64,7 +66,7 @@ def main_test():
     return test_chart
 
 
-def save_chart(data: List[dict]):
+def save_chart(data: List[List[dict]]):
     file = open(".output.csv", "w+")
     for i in data:
         prefix = f"len{len(i[0]['word'])}"
@@ -84,6 +86,6 @@ if __name__ == "__main__":
             automated_test_3(input("Insert word to match: "))
         elif case == "4":
             chart = main_test()
-            save_chart()
+            save_chart(chart)
         else:
             break

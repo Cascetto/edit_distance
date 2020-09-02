@@ -1,7 +1,7 @@
 from math import inf
 
 
-def edit_distance(x: str, y: str, cost: dict = None) -> int:
+def edit_distance(x: str, y: str, cost: dict = None) -> float:
     if cost is None:
         cost = {'copy': 0, 'replace': 1, 'twiddle': 1, 'insert': 1, 'delete': 1}
     m = len(x) + 1
@@ -37,10 +37,6 @@ def edit_distance(x: str, y: str, cost: dict = None) -> int:
             if distance[i * n + (j - 1)] + cost['insert'] < distance[i * n + j]:
                 distance[i * n + j] = distance[i * n + (j - 1)] + cost['insert']
                 operation[i * n + j] = f"Insert {y[j - 1]}"
-
-    # print_matrix(distance, m, n)
-    # print_matrix(operation, m, n)
-
     return distance[m * n - 1]
 
 
