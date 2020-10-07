@@ -1,4 +1,3 @@
-from typing import List, Tuple
 import matplotlib.pyplot as plt
 
 from edit_distance import *
@@ -39,52 +38,41 @@ def automated_test_3(query: str):
     return timechart
 
 
-def sub_test(word_length: int, set_size: int) -> Tuple[List[dict]]:
-    no_ngram_test = list()
-    ngram_test = list()
+def sub_test(word_length: int, set_size: int) -> list:
+    result = [[] for _ in range(101)]
     for i in range(set_size):
-        # no ngram test
         test = "".join(random.choices(string.ascii_lowercase, k=word_length))
-        start = tm()
-        matches, distance = get_closest_word(test, 0, 1)
-        stop = tm()
-        no_ngram_test.append({"word": test, "matches": matches, "distance": distance, "time": stop - start})
-
-        # ngram test
-        start = tm()
-        matches, distance = get_closest_word(test, 0.33, 3)
-        stop = tm()
-        ngram_test.append({"word": test, "matches": matches, "distance": distance, "time": stop - start})
-
-    return no_ngram_test, ngram_test
+        for threshold in range(101):
+            start = tm()
+            matches, checks = get_closest_word(test, threshold / 100, 2)
+            stop = tm()
+            result[threshold].append({"word": test, "matches": matches, "checks": checks, "time": stop - start})
+        print(f"\nWord {i + 1} done\n")
+    return result
 
 
 def main_test():
-    no_jaccard = list()
-    jaccard = list()
-    for i in range(3, 10):
-        temp = sub_test(i, 100)
-        no_jaccard.append(temp[0])
-        jaccard.append(temp[1])
-    return no_jaccard, jaccard
+    return sub_test(8, 100)
 
 
-def save_chart(data: List[List[dict]], file_path: str, plot_type: str):
+# xaxis = jaccard threshold
+# yaxis = time, number of matchs, umber of check
+
+
+def save_chart(data: list, file_path: str):
     file = open(file_path, "w+")
-    xaxis = []
-    yaxis = []
-    for i in data:
-        prefix = f"{len(i[0]['word'])}"
-        avg_time = 0
-        for j in i:
-            file.write(f"{prefix};{j['word']};{j['matches']};{j['distance']};{j['time']}\n")
-            avg_time += j['time']
-        avg_time /= len(i)
-        xaxis.append(len(i[0]['word']))
-        yaxis.append(avg_time)
-    plt.plot(xaxis, yaxis)
-    plt.title(plot_type)
-    plt.show()
+    for threshold_index in range(len(data)):
+        time = 0
+        ncheck = 0
+        nmatch = 0
+        for word_index in range(len(data[threshold_index])):
+            time += data[threshold_index][word_index]['time']
+            ncheck += data[threshold_index][word_index]['checks']
+            nmatch += len(data[threshold_index][word_index]['matches'])
+        time /= (len(data[threshold_index]) if len(data[threshold_index]) != 0 else 1)
+        nmatch /= (len(data[threshold_index]) if len(data[threshold_index]) != 0 else 1)
+        ncheck /= (len(data[threshold_index]) if len(data[threshold_index]) != 0 else 1)
+        file.write(f"{threshold_index / 100};{time};{nmatch};{ncheck}\n")
     file.close()
 
 
@@ -103,7 +91,5 @@ if __name__ == "__main__":
     #         save_chart(chart)
     #     else:
     #         break
-    chart1, chart2 = main_test()
-    save_chart(chart1, "./no_intersect.csv", "NO JACCARD INTERSECTION")
-    save_chart(chart2, "./intersect.csv", "JACCARD INTERSECTION ")
-
+    chart = main_test()
+    save_chart(chart, "./data.csv")
