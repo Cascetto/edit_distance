@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 from edit_distance import *
 from timeit import default_timer as tm
+from os import path
 import string
 import random
 
@@ -60,25 +61,34 @@ def sub_test(word_length: int, set_size: int) -> Tuple[List[dict]]:
     return no_ngram_test, ngram_test
 
 
-def main_test():
+def main_test(start_point: int):
     no_jaccard = list()
     jaccard = list()
+    next_iter = start_point
     for i in range(3, 10):
+        next_iter = i + 1 if i != 9 else 0
         temp = sub_test(i, 100)
         no_jaccard.append(temp[0])
         jaccard.append(temp[1])
+        if i != 10:
+            resume = input(f"{i}-length word set completed, want to continue? (Y/n)")
+            if resume == 'n':
+                break
+    filec = open("checkpoint.txt", 'w+')
+    filec.write(str(next_iter))
+    filec.close()
     return no_jaccard, jaccard
 
 
-def save_chart(data: List[List[dict]], file_path: str, plot_type: str):
-    file = open(file_path, "w+")
+def save_chart(data: List[List[dict]], file_path: str, plot_type: str, new_chart: bool = True):
+    filer = open(file_path, "w+" if new_chart else "a")
     xaxis = []
     yaxis = []
     for i in data:
         prefix = f"{len(i[0]['word'])}"
         avg_time = 0
         for j in i:
-            file.write(f"{prefix};{j['word']};{j['matches']};{j['distance']};{j['time']}\n")
+            filer.write(f"{prefix};{j['word']};{j['matches']};{j['distance']};{j['time']}\n")
             avg_time += j['time']
         avg_time /= len(i)
         xaxis.append(len(i[0]['word']))
@@ -86,25 +96,19 @@ def save_chart(data: List[List[dict]], file_path: str, plot_type: str):
     plt.plot(xaxis, yaxis)
     plt.title(plot_type)
     plt.show()
-    file.close()
+    filer.close()
 
 
 if __name__ == "__main__":
-    # while True:
-    #     case = input("Select activity:\n1) Manual test\n2) Automatic test (fixed n-gram size):\n"
-    #                  "3) Automatic test (fixed jaccard index requirement)\n4) Main test\nOther) Exit\n")
-    #     if case == "1":
-    #         manual_test(input("Insert word to match: "))
-    #     elif case == "2":
-    #         automated_test_2(input("Insert word to match: "))
-    #     elif case == "3":
-    #         automated_test_3(input("Insert word to match: "))
-    #     elif case == "4":
-    #         chart = main_test()
-    #         save_chart(chart)
-    #     else:
-    #         break
-    chart1, chart2 = main_test()
-    save_chart(chart1, "./no_intersect.csv", "NO JACCARD INTERSECTION")
-    save_chart(chart2, "./intersect.csv", "JACCARD INTERSECTION ")
+    if path.exists("checkpoint.txt"):
+        file = open("checkpoint.txt")
+        index = file.readline()
+        file.close()
+        chart1, chart2 = main_test(int(index))
+        save_chart(chart1, "./no_intersect.csv", "NO JACCARD INTERSECTION", int(index) <= 0)
+        save_chart(chart2, "./intersect.csv", "JACCARD INTERSECTION ", int(index) <= 0)
+    else:
+        chart1, chart2 = main_test(0)
+        save_chart(chart1, "./no_intersect.csv", "NO JACCARD INTERSECTION")
+        save_chart(chart2, "./intersect.csv", "JACCARD INTERSECTION ")
 
