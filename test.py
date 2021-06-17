@@ -87,27 +87,20 @@ def sub_test(word_length: int, set_size: int) -> Tuple[List[dict]]:
     return no_ngram_test, ngram_test
 
 
-def main_test(start_point: int):
+def main_test():
     no_jaccard = list()
     jaccard = list()
-    next_iter = start_point
-    for i in range(3, 5):
-        next_iter = i + 1 if i != 9 else 0
+    start = tm()
+    for i in reversed(range(3, 11)):
         temp = sub_test(i, 1)
         no_jaccard.append(temp[0])
         jaccard.append(temp[1])
-        # if i != 10:
-        #     resume = input(f"{i}-length word set completed, want to continue? (Y/n)")
-        #     if resume == 'n':
-        #         break
-    filec = open("checkpoint.txt", 'w+')
-    filec.write(str(next_iter))
-    filec.close()
+        print(tm() - start)
     return no_jaccard, jaccard
 
 
-def save_chart(data: List[List[dict]], file_path: str, plot_type: str, new_chart: bool = True):
-    filer = open(file_path, "w+" if new_chart else "a")
+def save_chart(data: List[List[dict]], file_path: str, plot_type: str):
+    filer = open(file_path, "w+")
     xaxis = []
     yaxis = []
     for i in data:
@@ -119,6 +112,8 @@ def save_chart(data: List[List[dict]], file_path: str, plot_type: str, new_chart
         avg_time /= len(i)
         xaxis.append(len(i[0]['word']))
         yaxis.append(avg_time)
+    plt.xlabel("Length of words")
+    plt.ylabel("Time to check")
     plt.plot(xaxis, yaxis)
     plt.title(plot_type)
     plt.show()

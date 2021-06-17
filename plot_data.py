@@ -45,4 +45,4 @@ def plot_graph(file_path: str):
 
 
 if __name__ == "__main__":
-    plot_graph("./data.csv")
+    plot_graph("./j.csv")
