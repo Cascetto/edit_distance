@@ -14,11 +14,11 @@ def list_to_string(l: list) -> str:
     return result
 
 
-def get_test_words(set_size: int = 1000) -> list:
-    check_list = open("check_list.txt", "r")
+def get_test_words(word_length: int, set_size: int = 1000) -> list:
+    check_list = open("lexicon.txt", "r")
     result = list()
     for line in check_list.readlines():
-        result.append(line[:-1])
+        len(line[:-1]) == word_length and result.append(line[:-1])
     set_size = set_size if set_size < len(result) else len(result)
     random.shuffle(result)
     return result[0: set_size]
@@ -27,7 +27,7 @@ def get_test_words(set_size: int = 1000) -> list:
 def shuffle_letters(words: list):
     for i in range(len(words)):
         a = list(words[i])
-        l = int(len(a)/2)
+        l = int(len(a)/3)
         nshuffle = random.randint(0, l)
         for _ in range(nshuffle):
             i = random.randint(0, len(a) - 2)
@@ -66,13 +66,17 @@ def automated_test_3(query: str):
     return timechart
 
 
-def sub_test(word_length: int, set_size: int) -> Tuple[List[dict]]:
+def sub_test(word_length: int, set_size: int):
     no_ngram_test = list()
     ngram_test = list()
-    for i in range(set_size):
+
+    word_list = get_test_words(set_size)
+    shuffle_letters(word_list)
+
+    for word in word_list:
 
         # no ngram test
-        test = "".join(random.choices(string.ascii_lowercase, k=word_length))
+        test = word
         start = tm()
         matches, distance = get_closest_word(test, 0, 1)
         stop = tm()
@@ -80,7 +84,7 @@ def sub_test(word_length: int, set_size: int) -> Tuple[List[dict]]:
 
         # ngram test
         start = tm()
-        matches, distance = get_closest_word(test, 0.33, 3)
+        matches, distance = get_closest_word(test, 0.33, 2)
         stop = tm()
         ngram_test.append({"word": test, "matches": matches, "distance": distance, "time": stop - start})
 
@@ -92,7 +96,7 @@ def main_test():
     jaccard = list()
     start = tm()
     for i in reversed(range(3, 11)):
-        temp = sub_test(i, 1)
+        temp = sub_test(i, 10)
         no_jaccard.append(temp[0])
         jaccard.append(temp[1])
         print(tm() - start)
@@ -102,19 +106,30 @@ def main_test():
 def save_chart(data: List[List[dict]], file_path: str, plot_type: str):
     filer = open(file_path, "w+")
     xaxis = []
-    yaxis = []
+    ytime = []
+    ynum_of_matches = []
     for i in data:
         prefix = f"{len(i[0]['word'])}"
         avg_time = 0
+        num_of_match = 0
         for j in i:
             filer.write(f"{prefix};{j['word']};{j['matches']};{j['distance']};{j['time']}\n")
             avg_time += j['time']
-        avg_time /= len(i)
+            num_of_match += len(j['matches'])
+        avg_time /= (l := len(i))
+        num_of_match /= l
         xaxis.append(len(i[0]['word']))
-        yaxis.append(avg_time)
+        ytime.append(avg_time)
+        ynum_of_matches.append(num_of_match)
+    filer.close()
     plt.xlabel("Length of words")
     plt.ylabel("Time to check")
-    plt.plot(xaxis, yaxis)
+    plt.plot(xaxis, ytime)
     plt.title(plot_type)
     plt.show()
-    filer.close()
+
+    plt.xlabel("Length of words")
+    plt.ylabel("Number of matches")
+    plt.plot(xaxis, ytime)
+    plt.title(plot_type)
+    plt.show()
