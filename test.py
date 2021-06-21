@@ -30,8 +30,8 @@ def shuffle_letters(words: list):
         l = int(len(a)/3)
         nshuffle = random.randint(0, l)
         for _ in range(nshuffle):
-            i = random.randint(0, len(a) - 2)
-            a[i], a[i + 1] = a[i + 1] + a[i]
+            j = random.randint(0, len(a) - 2)
+            a[j], a[j + 1] = a[j + 1] + a[j]
         words[i] = list_to_string(a)
 
 # def manual_test(query: str):
@@ -70,7 +70,7 @@ def sub_test(word_length: int, set_size: int):
     no_ngram_test = list()
     ngram_test = list()
 
-    word_list = get_test_words(set_size)
+    word_list = get_test_words(word_length, set_size)
     shuffle_letters(word_list)
 
     for word in word_list:
@@ -96,7 +96,7 @@ def main_test():
     jaccard = list()
     start = tm()
     for i in reversed(range(3, 11)):
-        temp = sub_test(i, 10)
+        temp = sub_test(i, 1)
         no_jaccard.append(temp[0])
         jaccard.append(temp[1])
         print(tm() - start)
@@ -130,6 +130,6 @@ def save_chart(data: List[List[dict]], file_path: str, plot_type: str):
 
     plt.xlabel("Length of words")
     plt.ylabel("Number of matches")
-    plt.plot(xaxis, ytime)
+    plt.plot(xaxis, ynum_of_matches)
     plt.title(plot_type)
     plt.show()
