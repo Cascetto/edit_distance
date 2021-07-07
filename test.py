@@ -113,7 +113,7 @@ def save_chart(data: List[List[dict]], file_path: str, plot_type: str):
         avg_time = 0
         num_of_match = 0
         for j in i:
-            filer.write(f"{prefix};{j['word']};{j['matches']};{j['distance']};{j['time']}\n")
+            filer.write(f"{prefix};{j['word']};{j['matches']};{j['time']}\n")
             avg_time += j['time']
             num_of_match += len(j['matches'])
         avg_time /= (l := len(i))
