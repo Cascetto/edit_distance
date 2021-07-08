@@ -75,18 +75,23 @@ def sub_test(word_length: int, set_size: int):
 
     for word in word_list:
 
-        # no ngram test
         test = word
-        start = tm()
-        matches, distance = get_closest_word(test, 0, 1)
-        stop = tm()
-        no_ngram_test.append({"word": test, "matches": matches, "distance": distance, "time": stop - start})
+        # no ngram test
+        # start = tm()
+        # matches, check = get_closest_word(test, 0, 1)
+        # stop = tm()
+        # no_ngram_test.append({"word": test, "matches": matches, "check": check, "time": stop - start})
+        #
+        # # ngram test
+        # start = tm()
+        # matches, check = get_closest_word(test, 0.33, 2)
+        # stop = tm()
+        # ngram_test.append({"word": test, "matches": matches, "check": check, "time": stop - start})
 
-        # ngram test
         start = tm()
-        matches, distance = get_closest_word(test, 0.33, 2)
+        matches, check = get_closest_word(test, 0.66, 2)
         stop = tm()
-        ngram_test.append({"word": test, "matches": matches, "distance": distance, "time": stop - start})
+        ngram_test.append({"word": test, "matches": matches, "check": check, "time": stop - start})
 
     return no_ngram_test, ngram_test
 
@@ -96,7 +101,7 @@ def main_test():
     jaccard = list()
     start = tm()
     for i in reversed(range(3, 11)):
-        temp = sub_test(i, 1)
+        temp = sub_test(i, 10)
         no_jaccard.append(temp[0])
         jaccard.append(temp[1])
         print(tm() - start)
@@ -113,9 +118,9 @@ def save_chart(data: List[List[dict]], file_path: str, plot_type: str):
         avg_time = 0
         num_of_match = 0
         for j in i:
-            filer.write(f"{prefix};{j['word']};{j['matches']};{j['time']}\n")
+            filer.write(f"{prefix};{j['word']};{j['check']};{j['time']}\n")
             avg_time += j['time']
-            num_of_match += len(j['matches'])
+            num_of_match += j['check']
         avg_time /= (l := len(i))
         num_of_match /= l
         xaxis.append(len(i[0]['word']))
