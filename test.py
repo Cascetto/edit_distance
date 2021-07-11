@@ -1,7 +1,12 @@
 import matplotlib.pyplot as plt
 import string
 import random
+import numpy as np
 
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator
 from typing import List, Tuple
 from edit_distance import *
 from timeit import default_timer as tm
@@ -27,12 +32,13 @@ def get_test_words(word_length: int, set_size: int = 1000) -> list:
 def shuffle_letters(words: list):
     for i in range(len(words)):
         a = list(words[i])
-        l = int(len(a)/3)
+        l = int(len(a) / 3)
         nshuffle = random.randint(0, l)
         for _ in range(nshuffle):
             j = random.randint(0, len(a) - 2)
             a[j], a[j + 1] = a[j + 1] + a[j]
         words[i] = list_to_string(a)
+
 
 # def manual_test(query: str):
 #     n_gram_length = input("Insert the desired ngram length: ")
@@ -74,7 +80,6 @@ def sub_test(word_length: int, set_size: int):
     shuffle_letters(word_list)
 
     for word in word_list:
-
         test = word
         # no ngram test
         # start = tm()
@@ -94,6 +99,46 @@ def sub_test(word_length: int, set_size: int):
         ngram_test.append({"word": test, "matches": matches, "check": check, "time": stop - start})
 
     return no_ngram_test, ngram_test
+
+
+def _3d_test(word_length: int, threshold_index: float, set_size: int):
+    word_list = get_test_words(word_length, set_size)
+    shuffle_letters(word_list)
+
+    start_time = tm()
+
+    for word in word_list:
+        test = word
+        get_closest_word(test, threshold_index, 2)
+
+    return tm() - start_time
+
+
+def bootstrap_3d_test(set_size: int = 10):
+    x = list(range(3, 6))
+    y = [(1.0/len(x)) * i for i in range(len(x))]
+    X = np.array(x)
+    Y = np.array(y)
+
+    z = [[_3d_test(wlen, index, set_size) for wlen in X] for index in Y]
+
+    X, Y = np.meshgrid(X, Y)
+    Z = np.array(z)
+
+    colortuple = ('y', 'b')
+    colors = np.empty(X.shape, dtype=str)
+    for y in range(xlen := len(x)):
+        for x in range(xlen):
+            colors[x, y] = colortuple[(x + y) % len(colortuple)]
+
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    ax.plot_surface(X, Y, Z, facecolors=colors, linewidth=0)
+    ax.set_xlabel("Lunghezza delle parole")
+    ax.set_ylabel("Soglia minima di controllo")
+    ax.set_zlabel(f"Tempo medio di esecuzione (su {set_size} elementi")
+    plt.show()
 
 
 def main_test():
